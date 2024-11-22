@@ -11,40 +11,32 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 /**
- * La clase ServerThread gestiona la comunicación con un cliente conectado al
- * servidor. Esta clase maneja las solicitudes del cliente, valida pagos,
- * descarga canciones y envía respuestas. Cada instancia de ServerThread se
- * ejecuta en un hilo separado para cada cliente conectado.
+ * Esta clase implementa un hilo de servidor que maneja la comunicación con un
+ * cliente. El hilo establece un protocolo de comunicación en el que se
+ * gestionan las solicitudes de canciones del cliente y se envían respuestas al
+ * mismo.
+ *
+ * La clase maneja la entrada y salida de datos del cliente a través de un
+ * socket, y se asegura de cerrar adecuadamente las conexiones al finalizar.
  */
 public class ServerThread implements Runnable {
 
-    private final Socket clientHandling;  // Socket para la conexión del cliente
-    private final UserValidator validatorUser;  // Validador de usuarios
-    private final SongValidator validatorSong;  // Validador de canciones
-    private SongSolicitor songSolicitor;  // Solicitud de canciones
-    private PrintWriter output = null;  // Flujo de salida para enviar datos al cliente
-    private BufferedReader input = null;  // Flujo de entrada para recibir datos del cliente
-    private ObjectOutputStream outputStream = null;  // Flujo de salida para objetos
-    private boolean outstandingBalance;  // Indica si el usuario tiene saldo pendiente
+    private final Socket clientHandling;
+    private final UserValidator validatorUser;
+    private final SongValidator validatorSong;
+    private SongSolicitor songSolicitor;
+    private PrintWriter output = null;
+    private BufferedReader input = null;
+    private ObjectOutputStream outputStream = null;
+    private boolean outstandingBalance;
 
-    /**
-     * Constructor de la clase ServerThread.
-     *
-     * @param clientHandling El socket que maneja la conexión con el cliente.
-     * @param validator El validador de usuarios.
-     */
     public ServerThread(Socket clientHandling, UserValidator validator) {
         this.clientHandling = clientHandling;
         this.validatorUser = validator;
         this.validatorSong = new SongValidator();
     }
 
-    /**
-     * Método que se ejecuta al iniciar el hilo. Se encargará de gestionar la
-     * comunicación con el cliente.
-     */
     @Override
     public void run() {
         if (getOutputStream() && getInputStream() && getObjectOutputStream()) {
@@ -53,11 +45,6 @@ public class ServerThread implements Runnable {
         }
     }
 
-    /**
-     * Establece el flujo de entrada desde el socket del cliente.
-     *
-     * @return true si se establece correctamente, false en caso contrario.
-     */
     private boolean getInputStream() {
         try {
             input = new BufferedReader(new InputStreamReader(clientHandling.getInputStream()));
@@ -67,11 +54,6 @@ public class ServerThread implements Runnable {
         return true;
     }
 
-    /**
-     * Establece el flujo de salida al socket del cliente.
-     *
-     * @return true si se establece correctamente, false en caso contrario.
-     */
     private boolean getOutputStream() {
         try {
             output = new PrintWriter(clientHandling.getOutputStream(), true);
@@ -81,11 +63,6 @@ public class ServerThread implements Runnable {
         return true;
     }
 
-    /**
-     * Establece el flujo de salida de objetos al socket del cliente.
-     *
-     * @return true si se establece correctamente, false en caso contrario.
-     */
     private boolean getObjectOutputStream() {
         try {
             outputStream = new ObjectOutputStream(clientHandling.getOutputStream());
@@ -95,22 +72,12 @@ public class ServerThread implements Runnable {
         return true;
     }
 
-    // ------------------------------------------------------------------------------------------------------------------------------
-    /**
-     * Verifica si el usuario tiene saldo pendiente.
-     *
-     * @return true si el usuario tiene saldo pendiente, false en caso
-     * contrario.
-     */
+// ------------------------------------------------------------------------------------------------------------------------------ \\
     private boolean checkBalance() {
         outstandingBalance = validatorUser.checkBalance();
         return outstandingBalance;
     }
 
-    /**
-     * Maneja el protocolo de comunicación con el cliente. Envía la lista de
-     * canciones disponibles y maneja las solicitudes del cliente.
-     */
     private void protocol() {
         try {
             sendSongs();  // Envía la lista de canciones
@@ -119,11 +86,6 @@ public class ServerThread implements Runnable {
         }
     }
 
-    /**
-     * Envía la lista de canciones disponibles al cliente.
-     *
-     * @throws IOException Si ocurre un error al enviar los datos.
-     */
     private void sendSongs() throws IOException {
         songSolicitor = new SongSolicitor();
         sendObjectResponse(songSolicitor.returnSongs());
@@ -131,8 +93,9 @@ public class ServerThread implements Runnable {
     }
 
     /**
-     * Maneja las solicitudes del cliente en un bucle.
+     * Método para manejar solicitudes en un bucle de espera.
      */
+
     private void handleRequests() {
         String request;
         while (true) {
@@ -149,15 +112,16 @@ public class ServerThread implements Runnable {
                 validateExit();
                 break;
             }
+            
             if ("show songs".equals(request)) {
-                sendDownloadedSongs();
+                sendStoredSongs();
                 break;
             }
         }
     }
 
     /**
-     * Valida y maneja la solicitud de descarga de canciones.
+     * Valida la solicitud de descarga.
      */
     private void validateSongs() {
         String songSended = read();
@@ -167,21 +131,23 @@ public class ServerThread implements Runnable {
             if (validatorSong.checkDoubleDownload(idUser, idSong)) {
                 writeResponse("song has already been downloaded");
             } else {
-                validatorUser.validateBalance(); // Actualiza el saldo en la base de datos al descargar la canción
-                validatorSong.manageSongUser(songSended, idUser);  // Inserta en la tabla intermedia de canciones descargadas
-                writeResponse("User with no due balance");
+                validatorUser.validateBalance(); //Aquí se descarga la canción actualizando el valor del saldo en la base de datos 
+                /*
+                 * Agrega el id del usuario y el id de la cancion a la tabla temporal 
+                 * en la que se almacena la info de la cancion que se ha descargado
+                 */
+                validatorSong.manageSongUser(songSended, idUser);      
+                writeResponse("User with no due balance"); //Se devuelve la respuesta de que el usuario ya no tiene saldo pendiente.}
             }
         } else {
+            // En caso de que el saldo pendiente sea true, se responde con la cantidad de saldo que debe el usuario
             double balanceDue = validatorUser.getBalance();
             String balance = Double.toString(balanceDue);
             writeResponse(balance);
         }
-        handleRequests();
+        handleRequests();// se vuelve a llamar a HandleRequest para seguir escuchando peticiones
     }
 
-    /**
-     * Valida y procesa la solicitud de pago.
-     */
     private void validatePayment() {
         if (validatorUser.validatePayment()) {
             writeResponse("processing payment");
@@ -194,31 +160,22 @@ public class ServerThread implements Runnable {
         handleRequests();
     }
 
-    /**
-     * Valida y maneja la solicitud de cierre de sesión.
-     */
     private void validateExit() {
         double balance = validatorUser.getBalance();
         String finalBalance = Double.toString(balance);
         writeResponse(finalBalance);
         finish();
     }
-
-    /**
-     * Envía las canciones descargadas del usuario al cliente.
-     */
-    private void sendDownloadedSongs() {
+    
+    
+    private void sendStoredSongs(){
         int idUser = validatorUser.getCurrentLoggedUser();
-        sendObjectResponse(validatorSong.returnSongDownloadedInfo(idUser));  // Envía la información de las canciones descargadas
+        sendObjectResponse(validatorSong.returnSongDownloadedInfo(idUser)); // Aquí se procede con la logica de mandar la info de las canciones descargadas     
         handleRequests();
+            
     }
+// ------------------------------------------------------------------------------------------------------------------------------ \\  
 
-    // ------------------------------------------------------------------------------------------------------------------------------
-    /**
-     * Lee una línea de la entrada del cliente.
-     *
-     * @return La línea leída del cliente.
-     */
     @SuppressWarnings("empty-statement")
     private String read() {
         String temp = null;
@@ -230,35 +187,19 @@ public class ServerThread implements Runnable {
         return temp;
     }
 
-    /**
-     * Escribe una respuesta en el flujo de salida al cliente.
-     *
-     * @param message El mensaje a enviar al cliente.
-     */
     private void writeResponse(String message) {
         output.println(message);
     }
 
-    /**
-     * Envía un objeto como respuesta al cliente.
-     *
-     * @param object El objeto a enviar al cliente.
-     */
     private void sendObjectResponse(Object object) {
         try {
-            outputStream.writeObject(object);  // Envía el objeto al cliente
+            outputStream.writeObject(object); // Envía la lista de canciones
             outputStream.flush();
         } catch (IOException exc) {
-            Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, "Error en el protocolo de comunicación", exc);
+                Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, "Error en el protocolo de comunicación", exc);
         }
     }
 
-    /**
-     * Finaliza la conexión con el cliente y cierra los flujos de entrada y
-     * salida.
-     *
-     * @return true si se cierra correctamente, false en caso contrario.
-     */
     private boolean finish() {
         try {
             if (input != null) {
@@ -271,7 +212,7 @@ public class ServerThread implements Runnable {
                 clientHandling.close();
             }
         } catch (IOException exc) {
-            Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, "Error en el protocolo de comunicación", exc);
+             Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, "Error en el protocolo de comunicación", exc);
             return false;
         }
         return true;

@@ -4,104 +4,67 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import controller.UserValidator;
 import java.io.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-/**
- * La clase Server representa un servidor que acepta conexiones de clientes,
- * valida sus credenciales y gestiona las solicitudes de los clientes mediante
- * hilos. El servidor escucha las solicitudes en un puerto específico y maneja
- * la autenticación y procesamiento de cada cliente.
- */
 public class Server {
 
-    private UserValidator validation;  // Validador de usuarios
-    private final int serverPort;  // Puerto del servidor
-    private ServerSocket server = null;  // Socket del servidor
-    private Socket client = null;  // Socket para la conexión con el cliente
-    private PrintWriter salida = null;  // Flujo de salida para enviar datos al cliente
-    private BufferedReader entrada = null;  // Flujo de entrada para recibir datos del cliente
+    private UserValidator validation;
+    private final int serverPort;
+    private ServerSocket server = null;
+    private Socket client = null;
+    private PrintWriter salida = null;
+    private BufferedReader entrada = null;
 
-    /**
-     * Constructor de la clase Server.
-     *
-     * @param port El puerto en el que el servidor escuchará las conexiones
-     * entrantes.
-     */
     public Server(int port) {
         this.serverPort = port;
     }
 
-    /**
-     * Inicia el servicio del servidor. Intenta crear el servicio (puerto de
-     * escucha) y manejar las solicitudes de los clientes.
-     *
-     * @return true si el servidor se inicia correctamente, false en caso
-     * contrario.
-     */
     public boolean iniciate() {
         if (!createService()) {
             return false;
         }
         return requestHandler();
     }
+// ------------------------------------------------------------------------------------------------------------------------------ \\  
 
-    /**
-     * Crea el servicio de escucha del servidor en el puerto especificado.
-     *
-     * @return true si el servicio se crea correctamente, false en caso
-     * contrario.
-     */
     private boolean createService() {
         try {
             server = new ServerSocket(serverPort);
         } catch (IOException exc) {
-            // Manejo de excepción sin imprimir en consola
+            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, exc);
             return false;
         }
         return true;
     }
 
-    /**
-     * Maneja las solicitudes entrantes de los clientes. Acepta conexiones,
-     * valida las credenciales y gestiona las solicitudes en hilos separados.
-     *
-     * @return true si se gestionan las solicitudes correctamente, false si
-     * ocurre un error.
-     */
     private boolean requestHandler() {
         try {
             while (true) {
-                client = server.accept();  // Acepta una nueva conexión de un cliente
-                validation = new UserValidator();  // Crea el validador de usuarios
-                entrada = new BufferedReader(new InputStreamReader(client.getInputStream()));  // Flujo de entrada
-                salida = new PrintWriter(client.getOutputStream(), true);  // Flujo de salida
+                client = server.accept();
+                validation = new UserValidator();
+                entrada = new BufferedReader(new InputStreamReader(client.getInputStream()));
+                salida = new PrintWriter(client.getOutputStream(), true);
 
-                // Lee las credenciales del cliente
-                String user = entrada.readLine();  // Lee el usuario
-                String pass = entrada.readLine();  // Lee la contraseña      
+                String user = entrada.readLine();  // Lee usuario
+                String pass = entrada.readLine();  // Lee contraseña      
 
-                // Valida las credenciales
                 if (validation.validateCredentials(user, pass)) {
-                    salida.println("VALID");  // Respuesta válida
-                    // Crea un hilo para gestionar la solicitud del cliente
+                    salida.println("VALID");
                     ServerThread thread = new ServerThread(client, validation);
                     new Thread(thread).start();
                 } else {
-                    salida.println("INVALID");  // Respuesta inválida
+                    salida.println("INVALID");
+                    
                 }
             }
         } catch (IOException exc) {
-            // Manejo de excepción sin imprimir en consola
+            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, exc);
             closeServer();
             return false;
         }
     }
 
-    /**
-     * Cierra el servidor y las conexiones abiertas.
-     *
-     * @return true si se cierra el servidor correctamente, false en caso
-     * contrario.
-     */
     private boolean closeServer() {
         try {
             if (!client.isClosed()) {
@@ -110,19 +73,15 @@ public class Server {
             if (!server.isClosed()) {
                 server.close();
             }
+
         } catch (IOException exc) {
-            // Manejo de excepción sin imprimir en consola
+            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, exc);
             return false;
-        }
-        // TODO: Implementar un mensaje de confirmación
+        } 
         return true;
     }
+// -------------------------------------------------------------------------- \\  
 
-    /**
-     * Método principal que inicia el servidor en el puerto 5500.
-     *
-     * @param args Los argumentos de la línea de comandos.
-     */
     public static void main(String[] args) {
         Server server = new Server(5500);
         server.iniciate();

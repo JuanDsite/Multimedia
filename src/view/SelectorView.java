@@ -6,13 +6,6 @@ import java.awt.event.ActionListener;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
-
-/**
- * Vista principal para la selección de canciones en un sistema de descarga.
- * Esta clase proporciona la interfaz gráfica de usuario para interactuar con el
- * sistema, mostrando una tabla con los resultados, y botones para descargar
- * canciones, ver en el reproductor y pagar.
- */
 public class SelectorView extends JFrame {
 
     private final JButton btnDownload; // Botón para realizar la consulta
@@ -227,29 +220,16 @@ public class SelectorView extends JFrame {
     public DefaultTableModel getTableModel() {
         return tableModel;
     }
-    
-    
-    /**
-     * Acción para cerrar la sesión del usuario, mostrando su saldo.
-     *
-     * @param balance Saldo restante del usuario.
-     */
+
     public void exit(String balance) {
         JOptionPane.showMessageDialog(null, "Se ha cerrado sesión exitosamente. Su saldo quedó con un total de $" + balance);
         System.exit(0);
     }
 
-
-    /**
-     * Muestra un mensaje indicando que la canción ya fue descargada.
-     */
     public void songDownloadMessage() {
         JOptionPane.showMessageDialog(null, "Esta canción ya fue descargada anteriormente");
     }
 
-    /**
-     * Muestra la información de ayuda para el usuario.
-     */
     public void showHelpInfo() {
         JOptionPane.showMessageDialog(null, """
                                             Para descargar una cancion, debes seleccionarla por su id correspondiente en el campo
@@ -257,20 +237,13 @@ public class SelectorView extends JFrame {
                                             En caso de que exista una deuda o saldo pendiente, hay que pagar dicha cantidad
                                             para poder continuar con las demas descargas.""");
     }
-    
-    
-    /**
-     * Muestra un mensaje de error cuando no hay canciones descargadas.
-     */
+
     public void noSongDonwloadedError() {
         JOptionPane.showMessageDialog(null, "No has descargado ninguna Canción.");
 
     }
-
-    /**
-     * Muestra un mensaje indicando que el pago fue exitoso.
-     */
-    public void paymentSuccess() {
+    
+    public void paymentSuccess(){
         JOptionPane.showMessageDialog(null, "El pago se hizo exitosamente");
     }
 }

@@ -3,6 +3,8 @@ package controller;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javazoom.jl.decoder.JavaLayerException;
 import javazoom.jl.player.advanced.AdvancedPlayer;
 import services.Client;
@@ -32,11 +34,11 @@ public class PlayerManager {
         this.songList = URLS;
 
     }
-    
-    public void setNamesArray(ArrayList<String> NAMES){
+
+    public void setNamesArray(ArrayList<String> NAMES) {
         this.songNames = NAMES;
     }
-    
+
     private void initListeners() {
         view.getPlayButton().addActionListener(e -> togglePlayPause());
         view.getStopButton().addActionListener(e -> stopSong());
@@ -53,7 +55,7 @@ public class PlayerManager {
         }
     }
 
-    public final void updateSongListDisplay() {
+    private void updateSongListDisplay() {
         view.updateSongList(songNames, currentSongIndex);
     }
 
@@ -66,13 +68,13 @@ public class PlayerManager {
                 try {
                     player.play();
                 } catch (JavaLayerException e) {
-                    e.printStackTrace();
+                    Logger.getLogger(PlayerManager.class.getName()).log(Level.SEVERE, null, e);
                 }
                 isPlaying = false;
             }).start();
             updateSongListDisplay();
         } catch (IOException | JavaLayerException e) {
-            e.printStackTrace();
+            Logger.getLogger(PlayerManager.class.getName()).log(Level.SEVERE, null, e);
         }
     }
 

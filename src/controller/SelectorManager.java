@@ -135,13 +135,10 @@ public class SelectorManager {
         selectorView.songDownloadMessage();
     }
 
-
     public void noSongDownloaded() {
         selectorView.noSongDonwloadedError();
-    } 
-    
-    
-   
+    }
+
     public void showPaymentMessage() {
         selectorView.paymentSuccess();
     }

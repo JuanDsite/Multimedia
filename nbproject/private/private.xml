@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-private xmlns="http://www.netbeans.org/ns/project-private/1">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
+    <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
+        <group>
+            <file>file:/C:/Users/PC/Documents/ReproductorAudio/src/controller/UserValidator.java</file>
+            <file>file:/C:/Users/PC/Documents/ReproductorAudio/src/model/DBConnection.java</file>
+            <file>file:/C:/Users/PC/Documents/ReproductorAudio/src/model/SongDAO.java</file>
+            <file>file:/C:/Users/PC/Documents/ReproductorAudio/src/view/SelectorView.java</file>
+            <file>file:/C:/Users/PC/Documents/ReproductorAudio/src/controller/SelectorManager.java</file>
+            <file>file:/C:/Users/PC/Documents/ReproductorAudio/src/controller/IValidatorUser.java</file>
+            <file>file:/C:/Users/PC/Documents/ReproductorAudio/src/view/LoginView.java</file>
+            <file>file:/C:/Users/PC/Documents/ReproductorAudio/src/model/UserDAO.java</file>
+            <file>file:/C:/Users/PC/Documents/ReproductorAudio/src/controller/PlayerManager.java</file>
+            <file>file:/C:/Users/PC/Documents/ReproductorAudio/src/services/ClientSongHandler.java</file>
+            <file>file:/C:/Users/PC/Documents/ReproductorAudio/src/controller/SongValidator.java</file>
+            <file>file:/C:/Users/PC/Documents/ReproductorAudio/src/services/ServerThread.java</file>
+            <file>file:/C:/Users/PC/Documents/ReproductorAudio/src/controller/LoginManager.java</file>
+            <file>file:/C:/Users/PC/Documents/ReproductorAudio/src/controller/SongSolicitor.java</file>
+            <file>file:/C:/Users/PC/Documents/ReproductorAudio/src/services/Client.java</file>
+            <file>file:/C:/Users/PC/Documents/ReproductorAudio/src/model/SongUserDAO.java</file>
+            <file>file:/C:/Users/PC/Documents/ReproductorAudio/src/model/SongUserVO.java</file>
+            <file>file:/C:/Users/PC/Documents/ReproductorAudio/src/view/PlayerView.java</file>
+            <file>file:/C:/Users/PC/Documents/ReproductorAudio/src/model/UserVO.java</file>
+            <file>file:/C:/Users/PC/Documents/ReproductorAudio/src/services/Server.java</file>
+            <file>file:/C:/Users/PC/Documents/ReproductorAudio/src/model/SongVO.java</file>
+        </group>
+    </open-files>
+</project-private>
